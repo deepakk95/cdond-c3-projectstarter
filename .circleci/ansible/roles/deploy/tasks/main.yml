@@ -15,7 +15,7 @@
     name: ['nodejs', 'npm']
     state: latest
     update_cache: yes
-- name: Install pm2
+- name: install pm2
   become: yes
   npm:
     name: pm2
@@ -28,7 +28,7 @@
     src: files/artifact.tar.gz
     dest: .
 
-- name: Start App
+- name: start application
   become: yes
   shell: |
     pm2 delete all
