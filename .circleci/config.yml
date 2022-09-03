@@ -31,14 +31,6 @@ commands:
             npm install
             npm run build
             npm run migrations:revert
-            SUCCESS = 1
-            if(( $SUCCESS==1 )); 
-            then
-            #  cd ~/project/backend
-            #  npm install
-            #  Add revert code here. You can find this in the Getting Started section.
-              exit 1
-            fi
 
 parameters:
   workflow_id:
@@ -241,6 +233,7 @@ jobs:
             then
               curl --insecure https://kvdb.io/63x6vXyjfWmLGkoT9ZvggA/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
+      # - Used kvdb bucket for migration      
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}    
 
@@ -322,21 +315,16 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update --no-cache curl aws-cli nodejs npm
-      # - run:
-      #     name: Get backend url
-      #     command: |
-      #       export BACKEND_IP=$(aws ec2 describe-instances \
-      #         --query 'Reservations[*].Instances[*].PublicIpAddress' \
-      #         --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-      #         --output text)
+      - run:
+          name: Get backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
+              --output text)
       - run:
           name: Backend smoke test.
           command: |
-            # export BACKEND_IP=$(tail ~/project/.circleci/ansible/inventory.txt)
-            export BACKEND_IP=$(aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters Name=tag:aws:cloudformation:stack-name,Values=udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7} \
-            --output text)
             export API_URL="http://${BACKEND_IP}:3030"
             echo $API_URL
             if curl -s "${API_URL}/api/status" | grep "ok"
@@ -426,7 +414,7 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - deploy-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          requires: [test-frontend, test-backend]
           filters:
             branches:
               only: [feature-branches]
