@@ -364,11 +364,11 @@ jobs:
 
 cleanup:
     docker:
-      -image: amazon/aws-cli
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
-          name: Get old stack workflow id and Remove old stacks and files
+          name: Remove old stacks and files
           command: |
             echo <<pipeline.parameters.workflow_id>>
             export OldWorkflowID=<<pipeline.parameters.workflow_id>>
